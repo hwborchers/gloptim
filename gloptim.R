@@ -1,7 +1,7 @@
 gloptim <- function(fn, lb, ub, x0 = NULL, rand = FALSE,
         method = c("deoptim", "cppdeoptim", "deoptimr",         # **DE**
                    "deopt", "simplede", "simpleea",             # **EA**
-                   "gensa", "ga", "genoud", # "rbga"            # **GA**
+                   "gensa", "ga", "genoud", "rbga",             # **GA**
                    "pso", "psopt", "hydropso", # "psoptim"      # **PSO**
                    "direct", "crs2lm", "isres", "stogo",        # **NLoptr**
                    "cmaoptim", "cmaes", "cmaesr", "purecmaes",  # **CMA-ES**
@@ -118,7 +118,17 @@ gloptim <- function(fn, lb, ub, x0 = NULL, rand = FALSE,
                       monitor = cntrl$info)
         return(list(xmin = sol@solution, fmin = s * sol@fitnessValue))
 
-    ## 
+    ## Genetic Algorithms in package 'genalg'
+    } else if (method == "rbga") {
+        sol = genalg::rbga(stringMin = lb, stringMax = ub,
+                           popSize = 200, iters = 100,  # elitism = 1,
+                           evalFunc = fn, verbose = FALSE)
+        m = which.min(sol$evaluations)
+        bestsol = sol$population[m,]
+        bestval = sol$evaluations[m]
+        return(list(xmin = bestsol, fmin = bestval))
+
+    ## Package 'genoud'
     } else if (method == "genoud") {
         if (is.null(gr))
             gr <- function(x) rep(0, d)
